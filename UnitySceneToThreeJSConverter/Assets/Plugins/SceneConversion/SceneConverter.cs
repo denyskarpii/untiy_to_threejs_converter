@@ -4,6 +4,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 
@@ -49,12 +50,53 @@ public class SceneConverter
         yamlDocuments.Load(parser);
 
         Debug.Log("Parsed number of documents=" + yamlDocuments.Documents.Count);
-        Debug.Log("Parsed first document=" + yamlDocuments.Documents[0].ToString());
+        Debug.Log("Parsed first document=" + yamlDocuments.Documents[0].RootNode["OcclusionCullingSettings"]["m_ObjectHideFlags"]);
+
+
+        //StreamReader inputSecond = new StreamReader(sceneAssetToConvertPath);
+
+        //IDeserializer deserializerSecond = new DeserializerBuilder().WithNodeTypeResolver(new UnityNodeTypeResolver()).Build();
+
+        //Parser parserSecond = new Parser(inputSecond);
+
+        //// Consume the stream start event "manually"
+        //parserSecond.Expect<StreamStart>();
+
+        //while (parserSecond.Accept<DocumentStart>())
+        //{
+        //    // Deserialize the document
+        //    List<object> doc = deserializerSecond.Deserialize<List<object>>(parserSecond);
+
+        //    //Debug.Log("object hid flag in occlusion culling settings: " + doc.OcclusionCullingSettings.m_ObjectHideFlags);
+        //}
+
+
+        YamlMappingNode[] mapping = new YamlMappingNode[yamlDocuments.Documents.Count];
+
+        for (int i = 0; i < yamlDocuments.Documents.Count; i++)
+        {
+            mapping[i] = (YamlMappingNode)yamlDocuments.Documents[i].RootNode;
+        }
+
+        string test = mapping[0]["OcclusionCullingSettings"]["m_ObjectHideFlags"].ToString();
+        Debug.Log(test);
 
         // Parse to data structure.
 
         // Create initial Three.js code to create a scene.
 
         // For each document (---), create code to recreate it in Three.js.
+    }
+
+    private class UnityScene
+    {
+        public OcclusionCullingSettings OcclusionCullingSettings { get; set; }
+    }
+
+    private class OcclusionCullingSettings
+    {
+        public short m_ObjectHideFlags { get; set; }
+        public int serializedVersion { get; set; }
+        public Dictionary<string, string> m_OcclusionBakeSettings { get; set; }
     }
 }
